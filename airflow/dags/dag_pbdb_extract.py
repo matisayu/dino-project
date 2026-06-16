@@ -11,9 +11,10 @@ from google.cloud import bigquery
 
 PBDB_URL = 'https://paleobiodb.org/data1.2/occs/list.json?base_name=Dinosauria&show=coords,paleoloc,classext,attr,loc,ref&limit=all'
 NDJSON_PATH = '/tmp/pbdb_dinosauria_raw.ndjson'
+
 GCP_PROJECT = 'dinosauria-499515'
-BQ_TABLE_ID = f'{GCP_PROJECT}.bronze.pbdb_dinosauria_raw'
 BUCKET = 'dinosauria-discovery-raw'
+BQ_TABLE_ID = f'{GCP_PROJECT}.bronze.pbdb_dinosauria_raw'
 
 def fetch_and_export():
     response = requests.get(PBDB_URL, timeout=60)
@@ -21,18 +22,21 @@ def fetch_and_export():
     data = response.json()
     records = data['records']
     
+    all_keys = set()
     with open(NDJSON_PATH, 'w') as f:
         for record in records:
+            all_keys.update(record.keys())
             str_record = {k: str(v) if v is not None else None for k, v in record.items()}
             f.write(json.dumps(str_record) + '\n')
 
     print(f"Fetched and exported {len(records)} records to {NDJSON_PATH}")
-    return NDJSON_PATH
+    return {'filepath': NDJSON_PATH, 'schema_keys': sorted(all_keys)}
 
 def upload_to_gcs(**kwargs):
     ti = kwargs['ti']
-    filepath = ti.xcom_pull(task_ids='fetch_and_export')
-    
+    result = ti.xcom_pull(task_ids='fetch_and_export')
+    filepath = result['filepath']
+
     client = storage.Client()
     bucket = client.bucket(BUCKET)
     blob = bucket.blob(os.path.basename(filepath))
@@ -42,11 +46,13 @@ def upload_to_gcs(**kwargs):
 def ingest_bq(**kwargs):
     ti = kwargs['ti']
     gcs_uri = ti.xcom_pull(task_ids='upload_to_gcs')
-    
+    fetch_result = ti.xcom_pull(task_ids='fetch_and_export')
+    schema = [bigquery.SchemaField(key, 'STRING') for key in fetch_result['schema_keys']]
+
     client = bigquery.Client(project=GCP_PROJECT)
     config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-        autodetect=True,
+        schema=schema,
         write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
     )
     job = client.load_table_from_uri(gcs_uri, BQ_TABLE_ID, job_config=config)
