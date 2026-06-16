@@ -2,6 +2,8 @@ import requests
 import json
 import os
 
+PBDB_URL = 'https://paleobiodb.org/data1.2/occs/list.json?base_name=Dinosauria&show=coords,paleoloc,classext,attr,loc,ref&limit=all'
+
 def fetch_data(url): 
     try:
         response = requests.get(url, timeout=30)
@@ -60,8 +62,7 @@ def export_data_ndjson(data, filepath):
                 
                 
 if __name__ == '__main__':
-    pbdb_url = 'https://paleobiodb.org/data1.2/occs/list.json?base_name=Dinosauria&show=coords,paleoloc,classext,attr,loc,ref&limit=all'
-    data = fetch_data(pbdb_url)
+    data = fetch_data(PBDB_URL)
     #filepath = 'data/pbdb_dinosauria_raw.json'
     #export_data_json(data, filepath)
     ndfilepath = 'data/pbdb_dinosauria_raw.ndjson'
