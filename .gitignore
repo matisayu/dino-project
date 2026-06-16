@@ -1,9 +1,13 @@
 .env
 .venv/
 data/
+airflow/keys/
+airflow/logs/
+airflow/config/
 __pycache__/
 *.pyc
 dino_discovery_spec.md
 learning_notes.txt
 commands.txt
 sample.txt
+settings.local.json
