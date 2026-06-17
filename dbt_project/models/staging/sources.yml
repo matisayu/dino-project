@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: dinosauria-499515
+    schema: bronze
+    tables:
+      - name: pbdb_dinosauria_raw
