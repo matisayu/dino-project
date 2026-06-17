@@ -5,7 +5,7 @@ WITH source AS (
 staged AS (
     SELECT
         -- occurrence identity
-        SAFE_CAST(REGEXP_EXTRACT(oid, r'occ:(\d+)') AS INT64)  AS occurrence_id,
+        SAFE_CAST(REGEXP_EXTRACT(oid, r'occ:(\d+)') AS INT64)   AS occurrence_id,
         tna                                                     AS taxon_name,
         idn                                                     AS identified_name,
         -- taxonomy
@@ -27,7 +27,7 @@ staged AS (
         SAFE_CAST(eag AS FLOAT64)                               AS early_age_ma,
         SAFE_CAST(lag AS FLOAT64)                               AS late_age_ma,
         oei                                                     AS early_interval,
-        oli                                                     AS late_interval
+        oli                                                     AS late_interval,
         -- discovery metadata
         att                                                     AS attribution,
         SAFE_CAST(REGEXP_EXTRACT -- check 4 digit years between 1500-2026
