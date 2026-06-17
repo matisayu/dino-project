@@ -5,6 +5,7 @@ import os
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 
 from google.cloud import storage
 from google.cloud import bigquery
@@ -77,5 +78,13 @@ with DAG(
         task_id='ingest_bq',
         python_callable=ingest_bq,
     )
+    task_dbt = BashOperator(
+        task_id='dbt_run',
+        bash_command=(
+            'dbt run '
+            '--project-dir /opt/airflow/dbt_project '
+            '--profiles-dir /opt/airflow/dbt_profiles'
+        )
+    )
     
-    task_fetch >> task_upload >> task_ingest
+    task_fetch >> task_upload >> task_ingest >> task_dbt
