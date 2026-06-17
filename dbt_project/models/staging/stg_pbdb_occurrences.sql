@@ -32,8 +32,8 @@ staged AS (
         att                                                     AS attribution,
         SAFE_CAST(REGEXP_EXTRACT -- check 4 digit years between 1500-2026
         (att, r'\b(1[5-9][0-9]{2}|20[0-2][0-6])\b') AS INT64)   AS discovery_year,
-        cid                                                     AS collection_id,
-        rid                                                     AS reference_id,
+        SAFE_CAST(REGEXP_EXTRACT(cid, r'col:(\d+)') AS INT64)   AS collection_id,
+        SAFE_CAST(REGEXP_EXTRACT(rid, r'ref:(\d+)') AS INT64)   AS reference_id,
         gsc                                                     AS collection_scale,
         altu                                                    AS altitude_units,
         SAFE_CAST(altv AS FLOAT64)                              AS altitude_value
