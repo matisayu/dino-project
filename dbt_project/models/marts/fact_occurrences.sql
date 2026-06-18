@@ -34,6 +34,7 @@ SELECT
     discovery_year,
     attribution,
     collection_id,
+    geology_comments,
 
     -- quality
     quality_score

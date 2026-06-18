@@ -36,7 +36,8 @@ staged AS (
         SAFE_CAST(REGEXP_EXTRACT(rid, r'ref:(\d+)') AS INT64)   AS reference_id,
         gsc                                                     AS collection_scale,
         altu                                                    AS altitude_units,
-        SAFE_CAST(altv AS FLOAT64)                              AS altitude_value
+        SAFE_CAST(altv AS FLOAT64)                              AS altitude_value,
+        ggc                                                     AS geology_comments
     FROM source
 )
 
