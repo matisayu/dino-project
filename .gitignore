@@ -12,3 +12,4 @@ airflow/config/
 __pycache__/
 *.pyc
 settings.local.json
+settings.json

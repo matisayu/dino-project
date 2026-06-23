@@ -1,0 +1,43 @@
+/* Override top 8px margin */
+body {
+  margin: 0;
+}
+
+/* Slider styling */
+.dash-slider-track {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dash-slider-range {
+  background-color: #c8aaff !important;
+}
+
+.dash-slider-thumb {
+  background-color: #c8aaff !important;
+  border: 2px solid #c8aaff !important;
+}
+
+.dash-slider-mark {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.dash-slider-mark-outside-selection {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Tick line styling */
+.dash-slider-mark::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0 auto 4px;
+}
+
+/* Tooltip styling (currently selected value visual above slider) */
+.dash-slider-tooltip {
+  background-color: #1a1a2e !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+}
