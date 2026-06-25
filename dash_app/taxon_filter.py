@@ -23,11 +23,12 @@ def _taxon_row_children(name, checked):
         list[dash.html.Span]: the checkbox character + name text.
     """
     
-    # Unicode checkbox char instead of actual checkbox input, 
+    # Unicode checkbox char instead of actual checkbox input,
     # to avoid restyling native form control colors
+    # flexShrink = fixed width column
     return [
-        html.Span('☑' if checked else '☐', style={'marginRight': '8px', 'color': '#c8aaff' if checked else 'rgba(255,255,255,0.4)'}),
-        html.Span(name),
+        html.Span('☑' if checked else '☐', style={'marginRight': '8px', 'flexShrink': 0, 'color': '#c8aaff' if checked else 'rgba(255,255,255,0.4)'}),
+        html.Span(name, style={'minWidth': 0}), # override flex default min-width so this can shrink/wrap in the column
     ]
 
 
@@ -45,7 +46,7 @@ def _taxon_row(name, checked):
         _taxon_row_children(name, checked),
         id={'type': 'taxon-row', 'name': name},
         n_clicks=0,  # required by Dash for Input store
-        style={'cursor': 'pointer', 'padding': '3px 0', 'fontSize': '12px', 'color': 'rgba(255,255,255,0.85)'},
+        style={'cursor': 'pointer', 'padding': '3px 0', 'fontSize': '12px', 'color': 'rgba(255,255,255,0.85)', 'display': 'flex'}, # create columns for checkbox and label
     )
 
 
