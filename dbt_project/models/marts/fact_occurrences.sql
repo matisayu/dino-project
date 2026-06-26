@@ -32,6 +32,7 @@ SELECT
 
     -- discovery
     discovery_year,
+    author,
     attribution,
     collection_id,
     geology_comments,

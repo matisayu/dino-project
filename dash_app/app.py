@@ -12,24 +12,13 @@ See modules:
 
 from dash import Input, Output, dcc, html
 
-from data_dash import load_occurrences
+from data_dash import filter_occurrences, load_occurrences
 from map_dash import build_map
 from occurrence_panel import build_click_store, build_panel_box
 from server import app
-from slider_marks import geo_age_marks, year_marks
+from slider_marks import EPOCH_BOUNDARIES, EPOCH_NAMES, geo_age_marks, year_marks
+from statistics_panel import build_stats_panel, build_stats_store, build_stats_toggle_button
 from taxon_filter import build_taxon_nav_panel, build_taxon_stores
-
-# 'Geological Age' slider tick labels, oldest to youngest, left to right
-EPOCH_BOUNDARIES = [
-    '251.9 Ma', '247.2 Ma', '237.0 Ma', '201.3 Ma', '174.1 Ma',
-    '163.5 Ma', '145.0 Ma', '100.5 Ma', '66.0 Ma',
-]
-# Epoch names, one per gap between two adjacent boundaries above.
-EPOCH_NAMES = [
-    'Early Triassic', 'Middle Triassic', 'Late Triassic',
-    'Early Jurassic', 'Middle Jurassic', 'Late Jurassic',
-    'Early Cretaceous', 'Late Cretaceous',
-]
 
 # BigQuery queried once and cached
 df = load_occurrences()
@@ -75,10 +64,17 @@ app.layout = html.Div(
         # title
         html.H1('Mapping the Age of Discovery', style={'margin': '0 0 12px 0', 'paddingTop': '16px'}),
 
-        # Fossil count
-        html.Div(id='occurrence-count'),  # filled in by update_map() below
+        # Fossil count + statistics toggle, side by side
+        html.Div(
+            style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center'},
+            children=[
+                html.Div(id='occurrence-count'),  # filled in by update_map() below
+                build_stats_toggle_button(),
+            ],
+        ),
 
         build_click_store(),
+        build_stats_store(),
         *build_taxon_stores(),
 
         # Left-hand nav (taxon name filter) + map/panel, side by side
@@ -96,6 +92,7 @@ app.layout = html.Div(
                             style={'width': '100%', 'height': '620px', 'border': '4px solid rgba(255,255,255,0.07)', 'borderRadius': '12px', 'boxSizing': 'border-box'},
                         ),
                         build_panel_box(),
+                        build_stats_panel(),
                     ],
                 ),
             ],
@@ -171,14 +168,7 @@ def update_map(discovery_range, geo_idx_range, selected_taxa):
     lo_idx, hi_idx = sorted(geo_idx_range)
     selected_epochs = EPOCH_NAMES[lo_idx:hi_idx]  # epochs between two selected boundaries
 
-    filtered = df[
-        (df['discovery_year'] >= discovery_range[0]) &
-        (df['discovery_year'] <= discovery_range[1]) &
-        (df['geological_epoch'].isin(selected_epochs))
-    ]
-    if selected_taxa:  # empty means no taxon restriction
-        filtered = filtered[filtered['taxon_name'].isin(selected_taxa)]
-
+    filtered = filter_occurrences(df, discovery_range, selected_epochs, selected_taxa)
     return build_map(filtered), f'Showing {len(filtered):,} of {len(df):,} occurrences'
 
 

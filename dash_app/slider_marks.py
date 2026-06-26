@@ -2,6 +2,18 @@
 
 import math
 
+# 'Geological Age' slider tick labels, oldest to youngest, left to right
+EPOCH_BOUNDARIES = [
+    '251.9 Ma', '247.2 Ma', '237.0 Ma', '201.3 Ma', '174.1 Ma',
+    '163.5 Ma', '145.0 Ma', '100.5 Ma', '66.0 Ma',
+]
+# Epoch names, one per gap between two adjacent boundaries above.
+EPOCH_NAMES = [
+    'Early Triassic', 'Middle Triassic', 'Late Triassic',
+    'Early Jurassic', 'Middle Jurassic', 'Late Jurassic',
+    'Early Cretaceous', 'Late Cretaceous',
+]
+
 def geo_age_marks(boundaries: list) -> dict:
     """Generate marks for the Geological Age RangeSlider, keyed by index position.
 
