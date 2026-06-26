@@ -28,7 +28,6 @@ PANEL_VISIBLE_STYLE = {
     'boxShadow': '0 2px 12px rgba(0,0,0,0.5)',
 }
 
-
 def _occurrence_row(d, i):
     """Build one clickable row in the panel's list view, for fossil record `d`.
 

@@ -56,10 +56,11 @@ def build_map(df):
 <head>
 <style>
   /* Body style for iframe re-renders */
-  html, body {{ margin: 0; padding: 0; height: 100%; background: #a8cfe0; }} 
+  html, body {{ margin: 0; padding: 0; height: 100%; background: #a8cfe0; }}
   
   /* MapLibre container styling */
-  #container {{ width: 100%; height: 100%; border-radius: 12px; overflow: hidden; clip-path: inset(0 round 12px); }}
+  /* 3px keeps this corner concentric inside the iframe's own 12px radius/4px border */
+  #container {{ width: 100%; height: 100%; border-radius: 3px; overflow: hidden; }}
 
   /* deck.gl hover tooltip styling */
   .deck-tooltip {{
