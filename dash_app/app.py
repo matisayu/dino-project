@@ -12,6 +12,7 @@ See modules:
 
 from dash import Input, Output, dcc, html
 
+from about_panel import build_about_panel, build_about_store
 from data_dash import filter_occurrences, load_occurrences
 from map_dash import build_map
 from occurrence_panel import build_click_store, build_panel_box
@@ -19,6 +20,7 @@ from server import app
 from slider_marks import EPOCH_BOUNDARIES, EPOCH_NAMES, geo_age_marks, year_marks
 from statistics_panel import build_stats_panel, build_stats_store, build_stats_toggle_button
 from taxon_filter import build_taxon_nav_panel, build_taxon_stores
+from tutorial_panel import build_tutorial_panel, build_tutorial_store
 
 # BigQuery queried once and cached
 df = load_occurrences()
@@ -34,6 +36,35 @@ PANEL_STYLE = {
     'padding': '16px 24px',
     'marginTop': '10px',
     'flex': 1,
+}
+
+# Top banner style
+TOP_BANNER_STYLE = {
+    'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center',
+    'background': 'rgba(255,255,255,0.07)',
+    'border': '4px solid rgba(0,0,0,0.25)',
+    'borderRadius': '12px',
+    'padding': '14px 24px',
+    'marginBottom': '10px',
+}
+
+# Shared look for the banner toggle buttons (About, Tutorial, Statistics)
+TOGGLE_BUTTON_STYLE = {
+    'cursor': 'pointer', 'padding': '10px 20px', 'borderRadius': '8px',
+    'border': '1px solid rgba(255,255,255,0.15)', 'background': 'rgba(255,255,255,0.05)',
+    'fontSize': '15px', 'fontWeight': 'bold',
+}
+
+# Occurrence count badge, floats over the map's bottom left corner
+OCCURRENCE_COUNT_STYLE = {
+    'position': 'absolute',
+    'bottom': '10px', 'left': '10px',
+    'background': 'rgba(15, 15, 30, 0.8)',
+    'color': 'rgba(255,255,255,0.85)',
+    'fontSize': '12px',
+    'padding': '4px 10px',
+    'borderRadius': '4px',
+    'zIndex': 10,  # above the map iframe, below panel-box (1000) and stats-panel (900)
 }
 
 
@@ -58,23 +89,29 @@ def _two_line_label(text):
 
 # Generate full web app html
 app.layout = html.Div(
-    style={'background': 'rgba(15, 15, 30, 0.93)', 'minHeight': '100vh', 'padding': '0 24px 24px', 'color': 'white', 'fontFamily': 'sans-serif'},
+    style={'background': 'rgba(15, 15, 30, 0.93)', 'minHeight': '100vh', 'padding': '8px 24px 24px', 'color': 'white', 'fontFamily': 'sans-serif'},
 
     children=[
-        # title
-        html.H1('Mapping the Age of Discovery', style={'margin': '0 0 12px 0', 'paddingTop': '16px'}),
-
-        # Fossil count + statistics toggle, side by side
+        # Top banner: logo and panel toggles, side by side
         html.Div(
-            style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center'},
+            style=TOP_BANNER_STYLE,
             children=[
-                html.Div(id='occurrence-count'),  # filled in by update_map() below
-                build_stats_toggle_button(),
+                html.Img(src=app.get_asset_url('dinotrace_logo.png'), style={'height': '40px'}),
+                html.Div(
+                    style={'display': 'flex', 'alignItems': 'center', 'gap': '12px'},
+                    children=[
+                        html.Span('About', id='about-toggle-btn', n_clicks=0, style=TOGGLE_BUTTON_STYLE),
+                        html.Span('Tutorial', id='tutorial-toggle-btn', n_clicks=0, style=TOGGLE_BUTTON_STYLE),
+                        build_stats_toggle_button(),
+                    ],
+                ),
             ],
         ),
 
         build_click_store(),
         build_stats_store(),
+        build_about_store(),
+        build_tutorial_store(),
         *build_taxon_stores(),
 
         # Left-hand nav (taxon name filter) + map/panel, side by side
@@ -93,6 +130,9 @@ app.layout = html.Div(
                         ),
                         build_panel_box(),
                         build_stats_panel(),
+                        build_about_panel(),
+                        build_tutorial_panel(),
+                        html.Div(id='occurrence-count', style=OCCURRENCE_COUNT_STYLE),  # filled in by update_map() below
                     ],
                 ),
             ],
@@ -102,7 +142,7 @@ app.layout = html.Div(
             style={'display': 'flex', 'gap': '24px'},
             children=[
                 html.Div(style=PANEL_STYLE, children=[
-                    html.Label('Discovery Year', style={'display': 'block', 'textAlign': 'center', 'marginBottom': '55px'}),
+                    html.Label('Filter by Discovery Year', style={'display': 'block', 'textAlign': 'center', 'marginBottom': '55px'}),
                     dcc.RangeSlider(
                         id='discovery-slider',
                         min=YEAR_MIN,
@@ -115,7 +155,7 @@ app.layout = html.Div(
                     ),
                 ]),
                 html.Div(style=PANEL_STYLE, children=[
-                    html.Label('Geological Age', style={'display': 'block', 'textAlign': 'center', 'marginBottom': '55px'}),
+                    html.Label('Filter by Geological Age', style={'display': 'block', 'textAlign': 'center', 'marginBottom': '55px'}),
                     dcc.RangeSlider(
                         id='geo-age-slider',
                         min=0,

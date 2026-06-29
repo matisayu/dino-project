@@ -70,19 +70,20 @@ def _top_discoverers(filtered, n=5):
     return filtered['author'].value_counts().head(n)
 
 
-def _stat_column_children(title, counts):
+def _stat_column_children(title, counts, footnote=None):
     """A heading + a 'name -- count' row per entry, for one column's content.
 
     Args:
         title (str): column heading, ex: 'Top Dinosaurs'.
         counts (pandas.Series): value_counts() result to display.
+        footnote (str | None): optional small note shown below the list.
 
     Returns:
         list: ready to drop into a column Div's `children`.
     """
-    
-    
-    return [
+
+
+    children = [
         # title -- same horizontal margin as the sub-columns, so its width matches theirs
         html.Div(title, style={
             'fontWeight': 'bold', 'color': '#fff',
@@ -122,6 +123,9 @@ def _stat_column_children(title, counts):
             style=SUB_COLUMN_STYLE,
         ),
     ]
+    if footnote:
+        children.append(html.Div(footnote, style={'fontSize': '11px', 'color': 'rgba(255,255,255,0.4)', 'margin': '10px'}))
+    return children
     
 def _build_pie(counts):
     fig = go.Figure(go.Pie(labels=counts.index, values=counts.values))
@@ -177,7 +181,10 @@ def render_statistics_panel(discovery_range, geo_idx_range, selected_taxa, is_op
     style = STATS_VISIBLE_STYLE if is_open else STATS_HIDDEN_STYLE
     taxa_col = _stat_column_children('Top Dinosaurs', _top_taxa(filtered))
     countries_col = _stat_column_children('Top Countries', _top_countries(filtered))
-    discoverers_col = _stat_column_children('Top Discoverers', _top_discoverers(filtered))
+    discoverers_col = _stat_column_children(
+        'Top Discoverers', _top_discoverers(filtered),
+        footnote='PaleobioDB Discoverer credit is by surname only, different people sharing a surname may appear as one entry.',
+    )
     return style, taxa_col, countries_col, discoverers_col
 
 
@@ -187,21 +194,21 @@ def build_stats_store():
 
 
 def build_stats_toggle_button():
-    """Small button that toggles the statistics panel open/closed."""
+    """Button that toggles the statistics panel open/closed."""
     return html.Span(
-        'Statistics',
+        'View Top Dinosaurs, Countries & Discoverers',
         id='stats-toggle-btn',
         n_clicks=0,
         style={
-            'cursor': 'pointer', 'padding': '6px 14px', 'borderRadius': '6px',
+            'cursor': 'pointer', 'padding': '10px 20px', 'borderRadius': '8px',
             'border': '1px solid rgba(255,255,255,0.15)', 'background': 'rgba(255,255,255,0.05)',
-            'fontSize': '13px',
+            'fontSize': '15px', 'fontWeight': 'bold',
         },
     )
 
 
 def build_stats_panel():
-    """The overlay itself: three columns + a disclaimer, starting hidden.
+    """The overlay itself: three columns, starting hidden.
 
     Returns:
         dash.html.Div: ready to drop alongside the map iframe.
@@ -213,9 +220,5 @@ def build_stats_panel():
             html.Div(id='stats-taxa-column', style=COLUMN_STYLE),
             html.Div(id='stats-countries-column', style=COLUMN_STYLE),
             html.Div(id='stats-discoverers-column', style=COLUMN_STYLE),
-            html.Div( # disclaimer
-                'Discoverer credit is by surname only, as recorded in PBDB -- different people sharing a surname may appear as one entry.',
-                style={'position': 'absolute', 'bottom': '12px', 'left': '20px', 'right': '20px', 'fontSize': '11px', 'color': 'rgba(255,255,255,0.4)'},
-            ),
         ],
     )
